@@ -1,0 +1,12 @@
+# Railway config for Mailflare (self-hosted email inbox for custom domains).
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# Public, unauthenticated endpoint; also used by upstream's Docker HEALTHCHECK.
+healthcheckPath = "/api/setup/status"
+healthcheckTimeout = 300
+restartPolicyType = "on_failure"
+# SQLite database, raw messages, attachments and backups.
+requiredMountPath = "/data"
