@@ -33,7 +33,7 @@ Google Workspace and Microsoft 365 charge for every user who needs an address on
 
 Here are common use cases for the self-hosted custom domain email inbox:
 
-* Giving a founder or small team professional custom domain email addresses without paying per seat for Google Workspace or Microsoft 365.
+* Giving a founder or small team professional custom domain email addresses without paying per seat for Google Workspace.
 * Running shared support, sales, and billing inboxes that several people read and answer from one place.
 * Replacing a separate Calendly subscription with built-in booking pages that send email invitations.
 * Routing, forwarding, or rejecting incoming mail per domain with rules, and triggering webhooks for automations.
@@ -51,7 +51,7 @@ There is no PostgreSQL, Redis, or object storage to provision. The database is S
 
 ### Implementation Details for Mailflare (Built from the upstream Mailflare Dockerfile)
 
-Upstream publishes no image, so the template builds upstream's own Dockerfile stages from a pinned commit. A small entrypoint chowns Railway's root-owned volume, then drops to the `node` user. Key variables: `PORT=3000`, `DATA_DIR=/data`, `APP_URL` set to the Railway public domain for links and provider webhooks, `SMTP_INBOUND_PORT=0` to switch off the port 25 listener, and `INBOUND_WEBHOOK_SECRET` for the Cloudflare relay Worker. Optional: `RESEND_API_KEY`, the AWS SES keys, `CF_ACCOUNT_ID` with `CF_TOKEN`, and `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`.
+Upstream publishes no image, so the template builds upstream's own Dockerfile stages from a pinned commit. A small entrypoint chowns Railway's root-owned volume, then drops to the `node` user. Key variables: `PORT=3000`, `DATA_DIR=/data`, `APP_URL` set to the Railway public domain for links and provider webhooks, `SMTP_INBOUND_PORT=0` to switch off the port 25 listener, and `INBOUND_WEBHOOK_SECRET` for the Cloudflare relay Worker. Setup requires an outbound sender: `SMTP_URL` (for example Resend SMTP on port 2465) or `CF_ACCOUNT_ID` with `CF_TOKEN`. Optional: `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`.
 
 ## How does Mailflare compare against other email platforms
 
@@ -73,7 +73,7 @@ Upstream publishes no image, so the template builds upstream's own Dockerfile st
 
 ## How to use Mailflare (the OSS email inbox)?
 
-Open the Railway domain right after deploy and go to `/setup`. The first account created becomes the primary admin, so finish this step before sharing the URL. Enter your domain and create the first mailbox, then on the domain page choose Resend or Amazon SES and paste the API credentials; Mailflare lists the DNS records to add. For Cloudflare Email Routing, deploy the relay Worker from the upstream repo and point it at `/api/inbound` with your `INBOUND_WEBHOOK_SECRET`. Then add mailboxes, users, routing rules, signatures, and booking pages.
+Open the Railway domain right after deploy and go to `/setup`. The first account created becomes the primary admin, so finish this step before sharing the URL. Setup checks for an outbound sender first, so set `SMTP_URL` to `smtps://resend:YOUR_KEY@smtp.resend.com:2465` (or Cloudflare credentials) before you begin. Enter your domain and create the first mailbox; Mailflare lists the DNS records to add, and the domain page takes Resend or SES keys for receiving. For Cloudflare Email Routing, deploy the relay Worker from the upstream repo and point it at `/api/inbound` with your `INBOUND_WEBHOOK_SECRET`. Then add mailboxes, users, rules, and booking pages.
 
 ## How to self host Mailflare on other VPS Services (Mailflare self hosting guide)
 
@@ -98,7 +98,7 @@ Run `docker compose up -d --build`, open port 25 for the built-in SMTP listener,
 Mailflare is **open source and free** under the AGPL-3.0 license, with no seat or mailbox limits. Your only costs are hosting and the mail provider: Cloudflare Email Routing receives for free, Resend's free tier covers 3,000 emails a month, and Amazon SES costs about $0.10 per 1,000 emails.
 
 ## Mailflare cloud vs self hosted comparison (Pricing, features, costs, and more)
-There is no paid Mailflare cloud plan; upstream offers a Cloudflare Workers deploy and a Docker self-host. Hosting it on Railway avoids the Cloudflare account setup and keeps the whole app in one container with a volume you control. Backups run daily at 02:00 UTC to the same volume, and updating means bumping the pinned commit and redeploying.
+There is no paid Mailflare cloud plan; upstream offers a Cloudflare Workers deploy and a Docker self-host. Hosting it on Railway avoids the Cloudflare account setup and keeps the whole app in one container with a volume you control. Backups run daily at 02:00 UTC to the same volume.
 
 ### Monthly cost of self hosting Mailflare on Railway
 The Mailflare self hosting cost on Railway is typically $5-$10/month for a small team, covering the container and volume, plus provider usage beyond the free tiers.
