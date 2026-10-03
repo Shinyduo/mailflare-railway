@@ -18,7 +18,7 @@ Builds [hieunc229/mailflare](https://github.com/hieunc229/mailflare) (AGPL-3.0) 
 ## How to use
 
 1. Click **Deploy on Railway**.
-2. Open the generated domain at `/setup` and create the admin account.
+2. Open the generated domain at `/setup` **right after deploy** and create the admin account. Mailflare has no setup token: whoever submits `/setup` first becomes the primary admin.
 3. Pick how mail flows (Railway cannot accept inbound SMTP on port 25, so the built-in listener is off):
    - **Resend or Amazon SES per domain** (simplest): add the API credentials on the domain page. Inbound and outbound both go over HTTPS.
    - **Cloudflare Email Routing**: keep MX on Cloudflare and deploy `deploy/cloudflare-email-relay` from the upstream repo, pointing it at `https://<your-domain>/api/inbound` with the `INBOUND_WEBHOOK_SECRET` value from this service.
